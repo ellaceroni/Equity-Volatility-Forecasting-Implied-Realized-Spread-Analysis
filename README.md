@@ -77,13 +77,7 @@ Ridge and Lasso coefficients are also used to examine which variables contribute
 
 ## 6. Implied-Realized Spread Forecast
 
-Because VIX is known at the forecast date, the realized volatility forecast can be converted into a forecast of the future spread:
-
-\[
-\text{Predicted Spread} = \text{VIX} - \widehat{\text{Future Realized Volatility}}
-\]
-
-The predicted spread is compared with the spread that is subsequently realized. Observations are also grouped into quintiles to test whether larger predicted spreads are followed by larger realized spreads.
+Because VIX is known at the forecast date, the realized volatility forecast can be converted into a forecast of the future spread. The predicted spread is compared with the spread that is subsequently realized. Observations are also grouped into quintiles to test whether larger predicted spreads are followed by larger realized spreads.
 
 ## Key Findings
 
