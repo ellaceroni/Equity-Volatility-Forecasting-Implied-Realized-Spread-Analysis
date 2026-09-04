@@ -1,46 +1,111 @@
-# Equity Options Pricing & Volatility Analysis
+# Equity Volatility Forecasting & Implied-Realized Spread Analysis
 
-Python analysis of equity option pricing, implied volatility, option Greeks, delta hedging, and the historical relationship between implied and realized volatility.
+Python analysis of SPY option pricing and S&P 500 volatility. The project implements Black-Scholes implied volatility and Greeks, forecasts 21-day realized volatility with linear, Ridge, Lasso, and Random Forest models, and analyzes the VIX minus realized volatility spread.
 
 ## Overview
 
-This project examines equity volatility from both an option pricing and empirical perspective. The first section uses current SPY option data to estimate implied volatility across strikes and maturities. Black-Scholes prices and Greeks are implemented directly in Python, with implied volatility recovered numerically from observed option prices. The second section examines the historical relationship between VIX and subsequent S&P 500 realized volatility. The analysis tests whether implied volatility tends to exceed realized volatility and whether VIX contains information about future volatility.
+The project has two parts.
 
-## Methodology
+The first uses current SPY option data to study implied volatility across strikes and maturities. Black-Scholes prices and Greeks are implemented directly in Python, and implied volatility is recovered numerically from market prices.
 
-### Option Pricing and Implied Volatility
+The second uses historical VIX and S&P 500 data to study realized volatility. It tests whether VIX tends to exceed subsequent realized volatility, builds out-of-sample forecasts of 21-day realized volatility, and compares those forecasts with VIX.
 
-- Implement Black-Scholes call pricing and analytical Delta, Gamma, and Vega.
-- Recover implied volatility using numerical root finding.
-- Use Treasury yields across short maturities as a proxy for the risk free rate curve.
-- Estimate forward prices from near-ATM call-put pairs.
-- Analyze implied volatility across strikes and expirations using forward log-moneyness.
+## 1. Option Pricing and Implied Volatility
 
-SPY options are American-style, while the Black-Scholes and put-call parity frameworks used here are European. These models are therefore treated as approximations.
+The option pricing section:
 
-### Greeks and Delta Hedging
+- Implements Black-Scholes call pricing.
+- Calculates Delta, Gamma, and Vega.
+- Recovers implied volatility with numerical root finding.
+- Uses short-term Treasury yields as a proxy for the risk-free rate curve.
+- Estimates forward prices from near-ATM call and put prices.
+- Examines implied volatility across strikes and maturities using forward log-moneyness.
 
-For a near-ATM option with approximately 30 days to expiration:
+SPY options are American-style, while Black-Scholes and the put-call parity formula used here are European. These are treated as approximations.
 
-- Calculate Delta, Gamma, and Vega.
-- Simulate an underlying price path using geometric Brownian motion.
-- Recalculate Delta through time to illustrate the mechanics of dynamic delta hedging.
+## 2. Greeks and Delta Hedging
 
-### Implied vs. Realized Volatility
+For a near-ATM SPY option with approximately 30 days to expiration, the project:
 
-Historical VIX data are compared with annualized S&P 500 volatility realized over the subsequent 21 trading days.
+- Calculates Delta, Gamma, and Vega.
+- Simulates an underlying price path using geometric Brownian motion.
+- Recalculates Delta through time.
+- Illustrates how a delta hedge changes as the underlying price and time to expiration change.
 
-The analysis includes summary statistics for implied and realized volatility, the average implied-realized volatility spread, HAC-robust inference for the mean spread, a regression of future realized volatility on current implied volatility, and a comparison of implied and realized volatility across VIX regimes.
+## 3. Historical Implied and Realized Volatility
+
+VIX is compared with annualized S&P 500 volatility realized over the following 21 trading days.
+
+The analysis includes:
+
+- Summary statistics for VIX and future realized volatility.
+- The average VIX minus realized-volatility spread.
+- HAC-robust inference for the mean spread.
+- A regression of future realized volatility on VIX.
+- Comparison of the implied-realized spread across VIX regimes.
+
+## 4. Realized Volatility Forecasting
+
+The forecasting section uses market information available at each date to predict S&P 500 realized volatility over the next 21 trading days.
+
+Features include:
+
+- VIX.
+- Realized volatility over 5, 21, and 63 trading days.
+- Downside realized volatility.
+- Recent S&P 500 returns.
+- Recent market drawdown.
+- Recent changes in VIX.
+- Variation in VIX.
+
+The models are:
+
+- Linear Regression.
+- Ridge Regression.
+- Lasso Regression.
+- Random Forest.
+
+Models are evaluated using expanding-window out-of-sample testing. A 21-day gap is used between training and test periods to avoid overlap between forward realized volatility labels and the test sample.
+
+Performance is compared using RMSE, MAE, out-of-sample R², and mean squared error relative to VIX.
+
+## 5. Model Interpretation and Regime Analysis
+
+Forecast performance is evaluated across four VIX regimes.
+
+Ridge and Lasso coefficients are also used to examine which variables contribute most to the forecasts. Random Forest feature importance provides a nonlinear comparison.
+
+## 6. Implied-Realized Spread Forecast
+
+Because VIX is known at the forecast date, the realized volatility forecast can be converted into a forecast of the future spread:
+
+\[
+\text{Predicted Spread} = \text{VIX} - \widehat{\text{Future Realized Volatility}}
+\]
+
+The predicted spread is compared with the spread that is subsequently realized. Observations are also grouped into quintiles to test whether larger predicted spreads are followed by larger realized spreads.
 
 ## Key Findings
 
-- SPY option prices exhibit substantial variation in implied volatility across strikes and maturities, including a clear downside volatility skew.
-- VIX has historically tended to exceed volatility subsequently realized by the S&P 500.
-- The average implied-realized volatility spread is statistically significant using HAC standard errors.
-- VIX is also significantly associated with subsequent realized volatility, indicating that implied volatility contains information about future market risk.
-- The absolute implied-realized volatility gap tends to be larger during higher-volatility regimes.
+- SPY option prices show clear variation in implied volatility across strikes and maturities.
+- VIX historically exceeds subsequent 21-day S&P 500 realized volatility on most observations.
+- The average implied-realized volatility spread is positive and statistically significant.
+- VIX contains useful information about future realized volatility.
+- Ridge and Lasso provide the strongest out-of-sample forecasts.
+- The regularized linear models reduce mean squared forecast error by about 16% relative to using VIX alone.
+- The models outperform VIX across all four volatility regimes.
+- Current implied volatility, recent realized volatility, and recent market drawdowns contain the most useful forecasting information.
+- The highest predicted spread groups subsequently experience materially larger VIX minus realized volatility spreads than the lower groups.
 
-These results show that implied volatility can contain useful information about future volatility while also tending to exceed subsequently realized volatility.
+## Data
+
+- SPY option chains from Yahoo Finance.
+- S&P 500 Index (`^GSPC`) from Yahoo Finance.
+- VIX Index (`^VIX`) from Yahoo Finance.
+- U.S. Treasury yields from FRED.
+
+The historical analysis uses data from January 2010 through September 4, 2026.
+
 ## File
 
-`Equity_Options_Pricing_Volatility_Analysis.ipynb`
+`Equity_Volatility_Forecasting_&_Implied_Realized_Spread_Analysis.ipynb`
